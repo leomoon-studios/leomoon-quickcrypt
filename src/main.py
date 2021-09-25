@@ -15,6 +15,7 @@ import random
 from pathlib import Path #home directory
 from PyQt5 import QtWidgets, QtCore, QtGui #pyqt stuff
 #local imports
+from ext.darkdetect import isDark #darkdetect 0.5.0 [ https://github.com/albertosottile/darkdetect ] 20210912
 import ext.pyAesCrypt as pyAesCrypt
 from ext.docopt import docopt
 from gui.guiMain import Ui_main
@@ -42,6 +43,15 @@ class mainUi(QtWidgets.QMainWindow):
         #self.setWindowFlags(QtCore.Qt.FramelessWindowHint) #frameless window
         #self.setWindowFlags(QtCore.Qt.Window | QtCore.Qt.WindowTitleHint | QtCore.Qt.CustomizeWindowHint | QtCore.Qt.WindowCloseButtonHint) #close only window
         #self.ui.tabWidget.currentChanged.connect(self._tabChange) #detect tab change
+        ###############################################################################
+        ####### Theme startup #########################################################
+        ###############################################################################
+        if isDark():
+            self.themeFlg = False
+            self._theme()
+        ###############################################################################
+        ####### Variables #############################################################
+        ###############################################################################
         self.titleFontsize = 15
         self.uiFontsize = 8
         self.statusFontsize = 10
@@ -78,7 +88,6 @@ class mainUi(QtWidgets.QMainWindow):
         self.ui.tabWidget.setFont(QtGui.QFont('Vazir', self.uiFontsize))
         self.ui.titleLbl.setText(title)
         self.ui.verLbl.setText('v'+ver)
-        self.ui.verLbl.setStyleSheet("QLabel {color:white;}")
         #modify ui based on arguments
         if args['-e']:
             self.ui.tabWidget.setTabEnabled(1,False)
@@ -102,10 +111,10 @@ class mainUi(QtWidgets.QMainWindow):
             self.ui.encBrowseBtn.setFocus()
         #self.statusBar().setSizeGripEnabled(False) #disable resize arrow
         #prepare status bar
-        self.ui.statusLbl.setText('<span style="color:black;">Ready.</span>')
+        self.ui.statusLbl.setText('Ready.')
         self.ui.copyLbl.setOpenExternalLinks(True)
         self.ui.copyLbl.setTextInteractionFlags(QtCore.Qt.LinksAccessibleByMouse)
-        self.ui.copyLbl.setText('<a style="text-decoration:none; color: inherit;" href="http://leomoon.com">© LeoMoon Studios</a>')
+        self.ui.copyLbl.setText('© LeoMoon Studios')
         #self.ui.statusbar.addPermanentWidget(self.ui.statusLbl, 4)
         #self.ui.statusbar.addPermanentWidget(self.ui.copyLbl, 2)
         #label as link
@@ -122,26 +131,26 @@ class mainUi(QtWidgets.QMainWindow):
         self.ui.genBtn.clicked.connect(self._passgen)
         self.ui.genClearBtn.clicked.connect(self._clearall)
         self.ui.pppCbox.toggled.connect(self._toggle)
-        if sys.platform.startswith('darwin'): #macos
-            #pyqt 5.14.1 fixes
-            self.ui.tabWidget.resize(self.ui.tabWidget.width(), self.ui.tabWidget.height()+3)
-            self.ui.encBrowseBtn.resize(self.ui.encBrowseBtn.width()+11, self.ui.encBrowseBtn.height()+7)
-            self.ui.decBrowseBtn.resize(self.ui.decBrowseBtn.width()+11, self.ui.decBrowseBtn.height()+7)
-            self.ui.encClearBtn.resize(self.ui.encClearBtn.width()+11, self.ui.encClearBtn.height()+6)
-            self.ui.encBtn.resize(self.ui.encBtn.width()+11, self.ui.encBtn.height()+6)
-            self.ui.decClearBtn.resize(self.ui.decClearBtn.width()+11, self.ui.decClearBtn.height()+6)
-            self.ui.decBtn.resize(self.ui.decBtn.width()+11, self.ui.decBtn.height()+6)
-            self.ui.genBtn.resize(self.ui.genBtn.width()+11, self.ui.genBtn.height()+6)
-            self.ui.genClearBtn.resize(self.ui.genClearBtn.width()+11, self.ui.genClearBtn.height()+6)
-            self.ui.tabWidget.move(self.ui.tabWidget.pos().x()-2, self.ui.tabWidget.pos().y())
-            self.ui.encBrowseBtn.move(self.ui.encBrowseBtn.pos().x()-6, self.ui.encBrowseBtn.pos().y()-3)
-            self.ui.decBrowseBtn.move(self.ui.decBrowseBtn.pos().x()-6, self.ui.decBrowseBtn.pos().y()-3)
-            self.ui.encClearBtn.move(self.ui.encClearBtn.pos().x()-6, self.ui.encClearBtn.pos().y()-2)
-            self.ui.encBtn.move(self.ui.encBtn.pos().x()-6, self.ui.encBtn.pos().y()-2)
-            self.ui.decClearBtn.move(self.ui.decClearBtn.pos().x()-6, self.ui.decClearBtn.pos().y()-2)
-            self.ui.decBtn.move(self.ui.decBtn.pos().x()-6, self.ui.decBtn.pos().y()-2)
-            self.ui.genClearBtn.move(self.ui.genClearBtn.pos().x()-6, self.ui.genClearBtn.pos().y()-2)
-            self.ui.genBtn.move(self.ui.genBtn.pos().x()-6, self.ui.genBtn.pos().y()-2)
+        # if sys.platform.startswith('darwin'): #macos
+        #     #pyqt 5.14.1 fixes
+        #     self.ui.tabWidget.resize(self.ui.tabWidget.width(), self.ui.tabWidget.height()+3)
+        #     self.ui.encBrowseBtn.resize(self.ui.encBrowseBtn.width()+11, self.ui.encBrowseBtn.height()+7)
+        #     self.ui.decBrowseBtn.resize(self.ui.decBrowseBtn.width()+11, self.ui.decBrowseBtn.height()+7)
+        #     self.ui.encClearBtn.resize(self.ui.encClearBtn.width()+11, self.ui.encClearBtn.height()+6)
+        #     self.ui.encBtn.resize(self.ui.encBtn.width()+11, self.ui.encBtn.height()+6)
+        #     self.ui.decClearBtn.resize(self.ui.decClearBtn.width()+11, self.ui.decClearBtn.height()+6)
+        #     self.ui.decBtn.resize(self.ui.decBtn.width()+11, self.ui.decBtn.height()+6)
+        #     self.ui.genBtn.resize(self.ui.genBtn.width()+11, self.ui.genBtn.height()+6)
+        #     self.ui.genClearBtn.resize(self.ui.genClearBtn.width()+11, self.ui.genClearBtn.height()+6)
+        #     self.ui.tabWidget.move(self.ui.tabWidget.pos().x()-2, self.ui.tabWidget.pos().y())
+        #     self.ui.encBrowseBtn.move(self.ui.encBrowseBtn.pos().x()-6, self.ui.encBrowseBtn.pos().y()-3)
+        #     self.ui.decBrowseBtn.move(self.ui.decBrowseBtn.pos().x()-6, self.ui.decBrowseBtn.pos().y()-3)
+        #     self.ui.encClearBtn.move(self.ui.encClearBtn.pos().x()-6, self.ui.encClearBtn.pos().y()-2)
+        #     self.ui.encBtn.move(self.ui.encBtn.pos().x()-6, self.ui.encBtn.pos().y()-2)
+        #     self.ui.decClearBtn.move(self.ui.decClearBtn.pos().x()-6, self.ui.decClearBtn.pos().y()-2)
+        #     self.ui.decBtn.move(self.ui.decBtn.pos().x()-6, self.ui.decBtn.pos().y()-2)
+        #     self.ui.genClearBtn.move(self.ui.genClearBtn.pos().x()-6, self.ui.genClearBtn.pos().y()-2)
+        #     self.ui.genBtn.move(self.ui.genBtn.pos().x()-6, self.ui.genBtn.pos().y()-2)
             #pyqt 5.10.1 fixes
             #self.ui.tabWidget.move(10-2, 90-3)
             #self.ui.encClearBtn.move(200-6, 90-3)
@@ -232,6 +241,61 @@ class mainUi(QtWidgets.QMainWindow):
     #    elif i == 2:
     #        self.ui.genBtn.setDefault(True)
 
+    def _theme(self):
+        if not self.themeFlg:
+            dark_theme = QtGui.QPalette()
+            dark_theme.setColor(QtGui.QPalette.Window, QtGui.QColor(55,53,53))
+            dark_theme.setColor(QtGui.QPalette.WindowText, QtGui.QColor(227,227,227))
+            dark_theme.setColor(QtGui.QPalette.Base, QtGui.QColor(30,30,30))
+            dark_theme.setColor(QtGui.QPalette.AlternateBase, QtGui.QColor(55,55,55))
+            dark_theme.setColor(QtGui.QPalette.ToolTipBase, QtGui.QColor(50,50,50))
+            dark_theme.setColor(QtGui.QPalette.ToolTipText, QtGui.QColor(227,227,227))
+            dark_theme.setColor(QtGui.QPalette.Text, QtGui.QColor(227,227,227))
+            dark_theme.setColor(QtGui.QPalette.Link, QtGui.QColor(227,227,227))
+            dark_theme.setColor(QtGui.QPalette.Button, QtGui.QColor(50,50,50))
+            dark_theme.setColor(QtGui.QPalette.ButtonText, QtGui.QColor(227,227,227))
+            dark_theme.setColor(QtGui.QPalette.BrightText, QtGui.QColor(227,227,227))
+            dark_theme.setColor(QtGui.QPalette.Active, QtGui.QPalette.Button, QtGui.QColor(53, 53, 53))
+            dark_theme.setColor(QtGui.QPalette.Inactive, QtGui.QPalette.Button, QtGui.QColor(53, 53, 53))
+            dark_theme.setColor(QtGui.QPalette.Disabled, QtGui.QPalette.ButtonText, QtCore.Qt.darkGray)
+            dark_theme.setColor(QtGui.QPalette.Disabled, QtGui.QPalette.WindowText, QtCore.Qt.darkGray)
+            dark_theme.setColor(QtGui.QPalette.Disabled, QtGui.QPalette.Text, QtCore.Qt.darkGray)
+            dark_theme.setColor(QtGui.QPalette.Disabled, QtGui.QPalette.Light, QtGui.QColor(53, 53, 53))
+            QtGui.QGuiApplication.setPalette(dark_theme)
+            self.setStyleSheet("""
+                                    QFrame#banner {background-color: qlineargradient(x1:0 y1:0, x2:0 y2:1, stop:0 #5e5b5b, stop:1 #373535); border-radius: 0px;}
+                                    QLabel#titleLbl {color: rgb(227,227,227);}
+                                    QLabel#verLbl {color: rgb(227,227,227);}
+                                        """)
+            # self.ui.actionDarkMode.setChecked(True)
+        else:
+            light_theme = QtGui.QPalette()
+            light_theme.setColor(QtGui.QPalette.Window, QtGui.QColor(240,240,240))
+            light_theme.setColor(QtGui.QPalette.WindowText, QtGui.QColor(68,68,68))
+            light_theme.setColor(QtGui.QPalette.Base, QtGui.QColor(255,255,255))
+            light_theme.setColor(QtGui.QPalette.AlternateBase, QtGui.QColor(255,255,255))
+            light_theme.setColor(QtGui.QPalette.ToolTipBase, QtGui.QColor(240,240,240))
+            light_theme.setColor(QtGui.QPalette.ToolTipText, QtGui.QColor(68,68,68))
+            light_theme.setColor(QtGui.QPalette.Text, QtGui.QColor(68,68,68))
+            light_theme.setColor(QtGui.QPalette.Link, QtGui.QColor(68,68,68))
+            light_theme.setColor(QtGui.QPalette.Button, QtGui.QColor(240,240,240))
+            light_theme.setColor(QtGui.QPalette.ButtonText, QtGui.QColor(68,68,68))
+            light_theme.setColor(QtGui.QPalette.BrightText, QtGui.QColor(68,68,68))
+            light_theme.setColor(QtGui.QPalette.Active, QtGui.QPalette.Button, QtGui.QColor(240,240,240))
+            light_theme.setColor(QtGui.QPalette.Inactive, QtGui.QPalette.Button, QtGui.QColor(240,240,240))
+            light_theme.setColor(QtGui.QPalette.Disabled, QtGui.QPalette.ButtonText, QtGui.QColor(128,128,128))
+            light_theme.setColor(QtGui.QPalette.Disabled, QtGui.QPalette.WindowText, QtGui.QColor(128,128,128))
+            light_theme.setColor(QtGui.QPalette.Disabled, QtGui.QPalette.Text, QtGui.QColor(128,128,128))
+            light_theme.setColor(QtGui.QPalette.Disabled, QtGui.QPalette.Light, QtGui.QColor(243,243,243))
+            QtGui.QGuiApplication.setPalette(light_theme)
+            self.setStyleSheet("""
+                                    QFrame#banner {background-color: qlineargradient(x1:0 y1:0, x2:0 y2:1, stop:0 #c9c9c9, stop:1 #F0F0F0); border-radius: 0px;}
+                                    QLabel#titleLbl {color: rgb(68,68,68);}
+                                    QLabel#verLbl {color: rgb(68,68,68);}
+                                        """)
+            # self.ui.actionDarkMode.setChecked(False)
+        self.themeFlg = not self.themeFlg
+
     def _clearall(self):
         self.ui.encFileInp.setText('')
         self.ui.encPassInp.setText('')
@@ -239,29 +303,29 @@ class mainUi(QtWidgets.QMainWindow):
         self.ui.decFileInp.setText('')
         self.ui.decPassInp.setText('')
         self.ui.historyEdit.setPlainText('')
-        self.ui.statusLbl.setText('<span style="color:black;">All fields cleared.</span>')
+        self.ui.statusLbl.setText('All fields cleared.')
 
     def _encrypt(self):
         if self.ui.encFileInp.text() == '':
-            self.ui.statusLbl.setText('<span style="color:red;">Please select a file to encrypt!</span>')
+            self.ui.statusLbl.setText('<span style="color:#CD5C5C;">Please select a file to encrypt!</span>')
         elif os.path.exists(self.ui.encFileInp.text()) is False:
-            self.ui.statusLbl.setText('<span style="color:red;">Selected file does not exist!</span>')
+            self.ui.statusLbl.setText('<span style="color:#CD5C5C;">Selected file does not exist!</span>')
         elif os.path.isdir(self.ui.encFileInp.text()) is True:
-            self.ui.statusLbl.setText('<span style="color:red;">Please select a file, not a folder!</span>')
+            self.ui.statusLbl.setText('<span style="color:#CD5C5C;">Please select a file, not a folder!</span>')
         elif self.ui.encPassInp.text() == '':
-            self.ui.statusLbl.setText('<span style="color:red;">Password can not be empty!</span>')
+            self.ui.statusLbl.setText('<span style="color:#CD5C5C;">Password can not be empty!</span>')
         elif self.ui.encPassInp.text() != self.ui.encPassConfirmInp.text():
-            self.ui.statusLbl.setText('<span style="color:red;">Passwords do not match!</span>')
+            self.ui.statusLbl.setText('<span style="color:#CD5C5C;">Passwords do not match!</span>')
         else:
-            self.ui.statusLbl.setText('<span style="color:black;">Encrypting... Please wait...</span>')
+            self.ui.statusLbl.setText('Encrypting... Please wait...')
             with open(self.ui.encFileInp.text(), "rb") as fIn:
                 with open(self.ui.encFileInp.text()+'.aes', "wb") as fOut:
                     self.fail = False
                     try:
                         pyAesCrypt.encryptStream(fIn, fOut, self.ui.encPassInp.text(), self.buffersize)
-                        self.ui.statusLbl.setText('<span style="color:green;">File encrypted successfully.</span>')
+                        self.ui.statusLbl.setText('<span style="color:#228B22;">File encrypted successfully.</span>')
                     except ValueError as e:
-                        self.ui.statusLbl.setText('<span style="color:red;">'+str(e)+'</span>')
+                        self.ui.statusLbl.setText('<span style="color:#CD5C5C;">'+str(e)+'</span>')
                         self.fail = True
             if self.fail:
                 os.remove(self.ui.decFileInp.text()+'.aes')
@@ -271,13 +335,13 @@ class mainUi(QtWidgets.QMainWindow):
 
     def _decrypt(self):
         if self.ui.decFileInp.text() == '':
-            self.ui.statusLbl.setText('<span style="color:red;">Please select a file to decrypt!</span>')
+            self.ui.statusLbl.setText('<span style="color:#CD5C5C;">Please select a file to decrypt!</span>')
         elif os.path.exists(self.ui.decFileInp.text()) is False:
-            self.ui.statusLbl.setText('<span style="color:red;">Selected file does not exist!</span>')
+            self.ui.statusLbl.setText('<span style="color:#CD5C5C;">Selected file does not exist!</span>')
         elif os.path.isdir(self.ui.encFileInp.text()) is True:
-            self.ui.statusLbl.setText('<span style="color:red;">Please select a file, not a folder!</span>')
+            self.ui.statusLbl.setText('<span style="color:#CD5C5C;">Please select a file, not a folder!</span>')
         elif self.ui.decPassInp.text() == '':
-            self.ui.statusLbl.setText('<span style="color:red;">Password can not be empty!</span>')
+            self.ui.statusLbl.setText('<span style="color:#CD5C5C;">Password can not be empty!</span>')
         else:
             with open(self.ui.decFileInp.text(), "rb") as fIn:
                 with open(self.ui.decFileInp.text()[:-4], "wb") as fOut:
@@ -285,10 +349,10 @@ class mainUi(QtWidgets.QMainWindow):
                     self.fail = False
                     try:
                         pyAesCrypt.decryptStream(fIn, fOut, self.ui.decPassInp.text(), self.buffersize, self.encFileSize)
-                        self.ui.statusLbl.setText('<span style="color:green;">File decrypted successfully.</span>')
+                        self.ui.statusLbl.setText('<span style="color:#228B22;">File decrypted successfully.</span>')
                         self.ui.decPassInp.setText('')
                     except ValueError as e:
-                        self.ui.statusLbl.setText('<span style="color:red;">'+str(e)+'</span>')
+                        self.ui.statusLbl.setText('<span style="color:#CD5C5C;">'+str(e)+'</span>')
                         self.ui.decPassInp.setText('')
                         self.fail = True
             if self.fail:
@@ -334,6 +398,7 @@ class mainUi(QtWidgets.QMainWindow):
 
 def main():
     app = QtWidgets.QApplication(sys.argv)
+    app.setStyle('Fusion')
     main = mainUi()
     main.show()
     sys.exit(app.exec_())
