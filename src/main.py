@@ -44,23 +44,19 @@ class mainUi(QtWidgets.QMainWindow):
         #self.setWindowFlags(QtCore.Qt.Window | QtCore.Qt.WindowTitleHint | QtCore.Qt.CustomizeWindowHint | QtCore.Qt.WindowCloseButtonHint) #close only window
         #self.ui.tabWidget.currentChanged.connect(self._tabChange) #detect tab change
         ###############################################################################
-        ####### Theme startup #########################################################
-        ###############################################################################
-        if isDark():
-            self.themeFlg = False
-            self._theme()
-        ###############################################################################
         ####### Variables #############################################################
         ###############################################################################
+        self.hotSwitch = QtWidgets.QShortcut(QtGui.QKeySequence("Ctrl+M"), self)
+        self.hotSwitch.activated.connect(self._theme)
         self.titleFontsize = 15
-        self.uiFontsize = 8
-        self.statusFontsize = 10
+        self.uiFontsize = 10
+        self.statusFontsize = 11
         if sys.platform.startswith('darwin'):
             self.titleFontsize = 20
             self.uiFontsize = 13
             self.statusFontsize = 14
         self.ui.titleLbl.setFont(QtGui.QFont("Vazir", self.titleFontsize, QtGui.QFont.Black))
-        self.ui.verLbl.setFont(QtGui.QFont('Vazir', self.statusFontsize))
+        # self.ui.verLbl.setFont(QtGui.QFont('Vazir', self.statusFontsize))
         self.ui.encFileInp.setFont(QtGui.QFont('Vazir', self.uiFontsize))
         self.ui.encPassInp.setFont(QtGui.QFont('Vazir', self.uiFontsize))
         self.ui.encPassConfirmInp.setFont(QtGui.QFont('Vazir', self.uiFontsize))
@@ -110,6 +106,9 @@ class mainUi(QtWidgets.QMainWindow):
         else: #activate browse button
             self.ui.encBrowseBtn.setFocus()
         #self.statusBar().setSizeGripEnabled(False) #disable resize arrow
+        if isDark():
+            self.themeFlg = False
+            self._theme()
         #prepare status bar
         self.ui.statusLbl.setText('Ready.')
         self.ui.copyLbl.setOpenExternalLinks(True)
@@ -209,7 +208,6 @@ class mainUi(QtWidgets.QMainWindow):
     ###############################################################################
     ####### File Manipulation #####################################################
     ###############################################################################
-
     def _dropOpen(self, name):
         self.ui.encFileInp.setText('') #set text to nothing first
         self.ui.decFileInp.setText('') #set text to nothing first
@@ -259,9 +257,9 @@ class mainUi(QtWidgets.QMainWindow):
             dark_theme.setColor(QtGui.QPalette.HighlightedText, QtCore.Qt.black)
             dark_theme.setColor(QtGui.QPalette.Active, QtGui.QPalette.Button, QtGui.QColor(53, 53, 53))
             dark_theme.setColor(QtGui.QPalette.Inactive, QtGui.QPalette.Button, QtGui.QColor(53, 53, 53))
-            dark_theme.setColor(QtGui.QPalette.Disabled, QtGui.QPalette.ButtonText, QtCore.Qt.darkGray)
-            dark_theme.setColor(QtGui.QPalette.Disabled, QtGui.QPalette.WindowText, QtCore.Qt.darkGray)
-            dark_theme.setColor(QtGui.QPalette.Disabled, QtGui.QPalette.Text, QtCore.Qt.darkGray)
+            dark_theme.setColor(QtGui.QPalette.Disabled, QtGui.QPalette.ButtonText, QtGui.QColor(85,83,83))
+            dark_theme.setColor(QtGui.QPalette.Disabled, QtGui.QPalette.WindowText, QtGui.QColor(85,83,83))
+            dark_theme.setColor(QtGui.QPalette.Disabled, QtGui.QPalette.Text, QtGui.QColor(85,83,83))
             dark_theme.setColor(QtGui.QPalette.Disabled, QtGui.QPalette.Light, QtGui.QColor(53, 53, 53))
             QtGui.QGuiApplication.setPalette(dark_theme)
             self.setStyleSheet("""
@@ -284,12 +282,12 @@ class mainUi(QtWidgets.QMainWindow):
             light_theme.setColor(QtGui.QPalette.ButtonText, QtGui.QColor(68,68,68))
             light_theme.setColor(QtGui.QPalette.BrightText, QtGui.QColor(68,68,68))
             light_theme.setColor(QtGui.QPalette.Highlight, QtGui.QColor(18,131,220))
-            light_theme.setColor(QtGui.QPalette.HighlightedText, QtCore.Qt.black)
+            light_theme.setColor(QtGui.QPalette.HighlightedText, QtCore.Qt.white)
             light_theme.setColor(QtGui.QPalette.Active, QtGui.QPalette.Button, QtGui.QColor(240,240,240))
             light_theme.setColor(QtGui.QPalette.Inactive, QtGui.QPalette.Button, QtGui.QColor(240,240,240))
-            light_theme.setColor(QtGui.QPalette.Disabled, QtGui.QPalette.ButtonText, QtGui.QColor(128,128,128))
-            light_theme.setColor(QtGui.QPalette.Disabled, QtGui.QPalette.WindowText, QtGui.QColor(128,128,128))
-            light_theme.setColor(QtGui.QPalette.Disabled, QtGui.QPalette.Text, QtGui.QColor(128,128,128))
+            light_theme.setColor(QtGui.QPalette.Disabled, QtGui.QPalette.ButtonText, QtGui.QColor(118,118,118))
+            light_theme.setColor(QtGui.QPalette.Disabled, QtGui.QPalette.WindowText, QtGui.QColor(118,118,118))
+            light_theme.setColor(QtGui.QPalette.Disabled, QtGui.QPalette.Text, QtGui.QColor(118,118,118))
             light_theme.setColor(QtGui.QPalette.Disabled, QtGui.QPalette.Light, QtGui.QColor(243,243,243))
             QtGui.QGuiApplication.setPalette(light_theme)
             self.setStyleSheet("""
