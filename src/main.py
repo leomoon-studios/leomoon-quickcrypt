@@ -401,6 +401,8 @@ class mainUi(QtWidgets.QMainWindow):
 def main():
     app = QtWidgets.QApplication(sys.argv)
     app.setStyle('Fusion')
+    QtGui.QFontDatabase.addApplicationFont(':/gfx/fonts/Vazir.ttf') #add custom font to install
+    QtGui.QFontDatabase.addApplicationFont(':/gfx/fonts/Vazir-Black.ttf') #add custom font to install
     main = mainUi()
     main.show()
     sys.exit(app.exec_())
