@@ -6,6 +6,7 @@ SET osBuild=osx
 robocopy .\ ..\build\%osBuild%\ *.py /v
 robocopy ext\ ..\build\%osBuild%\ext\ *.py /v /s
 robocopy gui\ ..\build\%osBuild%\gui\ *.py /v
+robocopy gui\fonts\ ..\build\%osBuild%\gui\fonts\ *.ttf /v
 robocopy _fonts\ ..\build\%osBuild%\dist\Fonts\ *.ttf /v
 ::os specific
 robocopy .\ ..\build\%osBuild%\ *.dylib /v
@@ -18,6 +19,7 @@ SET osBuild=win
 robocopy .\ ..\build\%osBuild%\ *.py /v
 robocopy ext\ ..\build\%osBuild%\ext\ *.py /v /s
 robocopy gui\ ..\build\%osBuild%\gui\ *.py /v
+robocopy gui\fonts\ ..\build\%osBuild%\gui\fonts\ *.ttf /v
 robocopy _fonts\ ..\build\%osBuild%\dist\Fonts\ *.ttf /v
 ::os specific
 robocopy .\ ..\build\%osBuild%\ *.dll /v
@@ -33,6 +35,7 @@ SET osBuild=lin
 robocopy .\ ..\build\%osBuild%\ *.py /v
 robocopy ext\ ..\build\%osBuild%\ext\ *.py /v /s
 robocopy gui\ ..\build\%osBuild%\gui\ *.py /v
+robocopy gui\fonts\ ..\build\%osBuild%\gui\fonts\ *.ttf /v
 robocopy _fonts\ ..\build\%osBuild%\dist\Fonts\ *.ttf /v
 ::os specific
 robocopy _setup\deb-package\ ..\build\%osBuild%\dist\deb-package\ /e /v
