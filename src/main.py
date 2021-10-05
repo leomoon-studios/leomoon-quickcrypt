@@ -20,7 +20,7 @@ import ext.pyAesCrypt as pyAesCrypt
 from ext.docopt import docopt
 from gui.guiMain import Ui_main
 
-#version: 2.0.7
+#version: 2.0.8
 
 QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True) #enable highdpi scaling
 QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True) #use highdpi icons
