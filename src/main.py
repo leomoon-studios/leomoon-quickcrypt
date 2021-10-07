@@ -110,6 +110,9 @@ class mainUi(QtWidgets.QMainWindow):
         if isDark():
             self.themeFlg = False
             self._theme()
+        else:
+            self.themeFlg = True
+            self._theme()
         #prepare status bar
         self.ui.statusLbl.setText('Ready.')
         self.ui.copyLbl.setOpenExternalLinks(True)
