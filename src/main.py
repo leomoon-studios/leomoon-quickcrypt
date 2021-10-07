@@ -34,6 +34,7 @@ class mainUi(QtWidgets.QMainWindow):
         #print(args['FILE'])
         #print(args)
         QtWidgets.QWidget.__init__(self, None)
+        self.themeFlg = False
         self.setAcceptDrops(True) #accept file drops
         self.ui = Ui_main()
         self.ui.setupUi(self)
