@@ -6,9 +6,12 @@ Usage:
 """
 
 #todo
-
+import os
 import sys
-import os.path #file check
+#load dlls used by cairo
+dllpath = os.path.dirname(os.path.realpath(sys.argv[0]))
+os.environ["PATH"] += os.pathsep + dllpath
+os.environ["DYLD_FALLBACK_LIBRARY_PATH"] = dllpath
 import platform #detect os platform
 from os import stat, remove #decrypt
 import random
