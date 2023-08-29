@@ -5,17 +5,18 @@ Usage:
   QuickCrypt [-e FILE | -d FILE]
 """
 
-#todo
+#version: 2.0.9
+
+# TODO:
+
 import os
 import sys
-#load dlls used by cairo
+#load dlls
 dllpath = os.path.dirname(os.path.realpath(sys.argv[0]))
 os.environ["PATH"] += os.pathsep + dllpath
 os.environ["DYLD_FALLBACK_LIBRARY_PATH"] = dllpath
-import platform #detect os platform
 from os import stat, remove #decrypt
 import random
-from pathlib import Path #home directory
 from PyQt5 import QtWidgets, QtCore, QtGui #pyqt stuff
 #local imports
 from ext.darkdetect import isDark #darkdetect 0.7.1 [ https://github.com/albertosottile/darkdetect ] 20220718
@@ -23,7 +24,7 @@ import ext.pyAesCrypt as pyAesCrypt
 from ext.docopt import docopt
 from gui.guiMain import Ui_main
 
-#version: 2.0.9
+home_dir = os.path.expanduser("~")
 
 QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True) #enable highdpi scaling
 QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True) #use highdpi icons
@@ -226,12 +227,12 @@ class mainUi(QtWidgets.QMainWindow):
         #     self.ui.editorEdit.setFocus()
 
     def _encBrowse(self):
-        self.filename = QtWidgets.QFileDialog.getOpenFileName(self, 'Open...', str(Path.home()), "(*.*)")
+        self.filename = QtWidgets.QFileDialog.getOpenFileName(self, 'Open...', home_dir, "(*.*)")
         if self.filename and os.path.exists(self.filename[0]):
             self.ui.encFileInp.setText(self.filename[0])
 
     def _decBrowse(self):
-        self.filename = QtWidgets.QFileDialog.getOpenFileName(self, 'Open...', str(Path.home()), "(*.*)")
+        self.filename = QtWidgets.QFileDialog.getOpenFileName(self, 'Open...', home_dir, "(*.*)")
         if self.filename and os.path.exists(self.filename[0]):
             self.ui.decFileInp.setText(self.filename[0])
 
