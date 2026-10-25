@@ -55,20 +55,19 @@ jobs:
               }
             }
           if ([string]::IsNullOrWhiteSpace($developerPath)) { throw "Visual Studio developer path was not found" }
+          "Path=$developerPath" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
           if ("${{ matrix.release_arch }}" -eq "arm64") {
             $linker = Get-ChildItem -Path (Join-Path $installationPath "VC\Tools\MSVC\*\bin\Hostarm64\arm64\link.exe") | Select-Object -First 1 -ExpandProperty FullName
             if ([string]::IsNullOrWhiteSpace($linker)) { throw "MSVC ARM64 linker was not found" }
             $vcpkgRoot = "C:\vcpkg"
             $vcpkg = Join-Path $vcpkgRoot "vcpkg.exe"
             if (-not (Test-Path $vcpkg)) { throw "vcpkg was not found at $vcpkg" }
-            & $vcpkg install openssl:arm64-windows --disable-metrics
+            & $vcpkg install openssl:arm64-windows-static-md --disable-metrics
             if ($LASTEXITCODE -ne 0) { throw "Unable to install ARM64 OpenSSL with vcpkg" }
             "CARGO_TARGET_AARCH64_PC_WINDOWS_MSVC_LINKER=$linker" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
             "VCPKG_ROOT=$vcpkgRoot" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-            "OPENSSL_DIR=$vcpkgRoot\installed\arm64-windows" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-            "Path=$vcpkgRoot\installed\arm64-windows\bin;$developerPath" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-          } else {
-            "Path=$developerPath" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+            "OPENSSL_DIR=$vcpkgRoot\installed\arm64-windows-static-md" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+            "OPENSSL_STATIC=1" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
           }
 
       - name: Create locked project environment
@@ -90,7 +89,8 @@ jobs:
 
       - name: Build one-directory application
         shell: bash
-        run: .venv/Scripts/python.exe scripts/build.py --version "${{ inputs.version }}" --release-date "${{ inputs.release_date }}" --commit "${{ inputs.commit }}" --output-dir "build/windows-${{ matrix.release_arch }}" --clean
+        run: |
+          .venv/Scripts/python.exe scripts/build.py --version "${{ inputs.version }}" --release-date "${{ inputs.release_date }}" --commit "${{ inputs.commit }}" --output-dir "build/windows-${{ matrix.release_arch }}" --clean
 
       - name: Verify Windows PE dependencies
         shell: pwsh
