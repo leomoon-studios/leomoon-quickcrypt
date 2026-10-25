@@ -1,0 +1,79 @@
+name: macOS
+
+on:
+  workflow_call:
+    inputs:
+      version: { required: true, type: string }
+      release_date: { required: true, type: string }
+      commit: { required: true, type: string }
+
+permissions:
+  contents: read
+
+concurrency:
+  group: macos-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-package-arm64:
+    name: Build, package, and verify ARM64 DMG
+    runs-on: macos-15
+    timeout-minutes: 45
+    steps:
+      - name: Check out source
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+
+      - name: Set up Python
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
+        with: { python-version: "3.12" }
+
+      - name: Build, test, package, and verify
+        shell: bash
+        run: |
+          python -m venv .venv
+          .venv/bin/python -m pip install "uv==0.13.5"
+          .venv/bin/uv sync --all-extras --locked
+          .venv/bin/python scripts/generate_qt.py
+          git diff --exit-code -- src/leomoon_quickcrypt/_generated/main_window.py src/leomoon_quickcrypt/_generated/resources_rc.py
+          .venv/bin/python -m ruff check src tests scripts packaging
+          QT_QPA_PLATFORM=offscreen QT_QPA_PLATFORMTHEME=none QT_STYLE_OVERRIDE=Fusion .venv/bin/python -m pytest -q -rs
+          .venv/bin/python -m pip check
+          PIPAPI_PYTHON_LOCATION="$GITHUB_WORKSPACE/.venv/bin/python" .venv/bin/pip-audit
+          .venv/bin/python scripts/build.py --version "${{ inputs.version }}" --release-date "${{ inputs.release_date }}" --commit "${{ inputs.commit }}" --output-dir build/macos-arm64 --clean
+          .venv/bin/python scripts/smoke_bundle.py "build/macos-arm64/leomoon-quickcrypt/LeoMoon QuickCrypt.app/Contents/MacOS/LeoMoon QuickCrypt"
+          bash scripts/package-macos.sh --stage-dir build/macos-arm64/leomoon-quickcrypt --dist-dir dist --version "${{ inputs.version }}" --release-date "${{ inputs.release_date }}" --commit "${{ inputs.commit }}" --architecture arm64
+
+      - name: Retain raw bundle diagnostics on failure
+        if: failure()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: macos-arm64-failure-diagnostics
+          path: build/macos-arm64/
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Upload macOS release artifact
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: leomoon-quickcrypt-macos-arm64-release-${{ github.sha }}
+          path: dist/
+          if-no-files-found: error
+          retention-days: 14
+
+  clean-dmg-smoke:
+    needs: build-package-arm64
+    runs-on: macos-15
+    timeout-minutes: 20
+    steps:
+      - name: Check out verification scripts
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+
+      - name: Download macOS release artifact
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        with:
+          name: leomoon-quickcrypt-macos-arm64-release-${{ github.sha }}
+          path: dist
+
+      - name: Verify copied DMG application
+        shell: bash
+        run: bash scripts/smoke-macos-dmg.sh dist "${{ inputs.version }}" arm64
