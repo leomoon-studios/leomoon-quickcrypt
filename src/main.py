@@ -15,13 +15,12 @@ import sys
 dllpath = os.path.dirname(os.path.realpath(sys.argv[0]))
 os.environ["PATH"] += os.pathsep + dllpath
 os.environ["DYLD_FALLBACK_LIBRARY_PATH"] = dllpath
-from os import stat, remove #decrypt
 import random
 from PyQt5 import QtWidgets, QtCore, QtGui #pyqt stuff
 #local imports
 from ext.darkdetect import isDark #darkdetect 0.7.1 [ https://github.com/albertosottile/darkdetect ] 20220718
-import ext.pyAesCrypt as pyAesCrypt
 from ext.docopt import docopt
+from file_operations import delete_source_after_success, decrypt_file, encrypt_file
 from gui.guiMain import Ui_main
 
 home_dir = os.path.expanduser("~")
@@ -328,48 +327,31 @@ class mainUi(QtWidgets.QMainWindow):
             self.ui.statusLbl.setText('<span style="color:#CD5C5C;">Passwords do not match!</span>')
         else:
             self.ui.statusLbl.setText('Encrypting... Please wait...')
-            with open(self.ui.encFileInp.text(), "rb") as fIn:
-                with open(self.ui.encFileInp.text()+'.aes', "wb") as fOut:
-                    self.fail = False
-                    try:
-                        pyAesCrypt.encryptStream(fIn, fOut, self.ui.encPassInp.text(), self.buffersize)
-                        self.ui.statusLbl.setText('<span style="color:#228B22;">File encrypted successfully.</span>')
-                    except ValueError as e:
-                        self.ui.statusLbl.setText('<span style="color:#CD5C5C;">'+str(e)+'</span>')
-                        self.fail = True
-            if self.fail:
-                os.remove(self.ui.decFileInp.text()+'.aes')
-            else:
-                if self.ui.encDelCbox.isChecked():
-                    os.remove(self.ui.encFileInp.text())
+            try:
+                encrypt_file(self.ui.encFileInp.text(), self.ui.encPassInp.text())
+                delete_source_after_success(self.ui.encFileInp.text(), self.ui.encDelCbox.isChecked())
+                self.ui.statusLbl.setText('<span style="color:#228B22;">File encrypted successfully.</span>')
+            except (OSError, ValueError) as error:
+                self.ui.statusLbl.setText('<span style="color:#CD5C5C;">'+str(error)+'</span>')
 
     def _decrypt(self):
         if self.ui.decFileInp.text() == '':
             self.ui.statusLbl.setText('<span style="color:#CD5C5C;">Please select a file to decrypt!</span>')
         elif os.path.exists(self.ui.decFileInp.text()) is False:
             self.ui.statusLbl.setText('<span style="color:#CD5C5C;">Selected file does not exist!</span>')
-        elif os.path.isdir(self.ui.encFileInp.text()) is True:
+        elif os.path.isdir(self.ui.decFileInp.text()) is True:
             self.ui.statusLbl.setText('<span style="color:#CD5C5C;">Please select a file, not a folder!</span>')
         elif self.ui.decPassInp.text() == '':
             self.ui.statusLbl.setText('<span style="color:#CD5C5C;">Password can not be empty!</span>')
         else:
-            with open(self.ui.decFileInp.text(), "rb") as fIn:
-                with open(self.ui.decFileInp.text()[:-4], "wb") as fOut:
-                    self.encFileSize = stat(self.ui.decFileInp.text()).st_size
-                    self.fail = False
-                    try:
-                        pyAesCrypt.decryptStream(fIn, fOut, self.ui.decPassInp.text(), self.buffersize, self.encFileSize)
-                        self.ui.statusLbl.setText('<span style="color:#228B22;">File decrypted successfully.</span>')
-                        self.ui.decPassInp.setText('')
-                    except ValueError as e:
-                        self.ui.statusLbl.setText('<span style="color:#CD5C5C;">'+str(e)+'</span>')
-                        self.ui.decPassInp.setText('')
-                        self.fail = True
-            if self.fail:
-                os.remove(self.ui.decFileInp.text()[:-4])
-            else:
-                if self.ui.decDelCbox.isChecked():
-                    os.remove(self.ui.decFileInp.text())
+            try:
+                decrypt_file(self.ui.decFileInp.text(), self.ui.decPassInp.text())
+                delete_source_after_success(self.ui.decFileInp.text(), self.ui.decDelCbox.isChecked())
+                self.ui.statusLbl.setText('<span style="color:#228B22;">File decrypted successfully.</span>')
+            except (OSError, ValueError) as error:
+                self.ui.statusLbl.setText('<span style="color:#CD5C5C;">'+str(error)+'</span>')
+            finally:
+                self.ui.decPassInp.setText('')
 
     def _toggle(self):
         if self.ui.pppCbox.isChecked():
