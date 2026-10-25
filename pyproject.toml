@@ -1,10 +1,10 @@
 [build-system]
-requires = ["setuptools>=84.2.1,<85"]
+requires = ["setuptools>=84.2.1,<85", "setuptools-scm[simple]>=10.3.4,<11"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "leomoon-quickcrypt"
-version = "1.0.0"
+dynamic = ["version"]
 description = "Encrypt files and generate strong passwords."
 readme = "README.md"
 requires-python = ">=3.12"
@@ -41,6 +41,10 @@ include = ["leomoon_quickcrypt*"]
 
 [tool.setuptools.package-data]
 leomoon_quickcrypt = ["assets/fonts/*.ttf", "assets/icons/*", "ui/*.qrc", "ui/*.ui"]
+
+[tool.setuptools_scm]
+version_file = "src/leomoon_quickcrypt/_version.py"
+fallback_version = "0.0.0+unknown"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

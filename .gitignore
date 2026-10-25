@@ -15,6 +15,7 @@ dist/
 .eggs/
 *.egg
 *.manifest
+src/leomoon_quickcrypt/_version.py
 release-input/
 release-assets/
 artifacts/

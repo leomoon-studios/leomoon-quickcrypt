@@ -10,11 +10,12 @@ from darkdetect import isDark
 from .cli import parse_arguments
 from .crypto import delete_source_after_success, decrypt_file, encrypt_file
 from .passwords import generate_password
+from .release import DISPLAY_NAME
 from .version import __version__
 
 home_dir = os.path.expanduser("~")
 
-title = 'LeoMoon QuickCrypt'
+title = DISPLAY_NAME
 ver = __version__
 ColorGroup = QtGui.QPalette.ColorGroup
 ColorRole = QtGui.QPalette.ColorRole
