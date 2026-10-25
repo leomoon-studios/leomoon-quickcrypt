@@ -130,7 +130,7 @@ jobs:
 
       - name: Collect individual release assets
         shell: bash
-        run: scripts/collect-release-assets.sh release-input/linux release-input/windows release-input/macos release-assets
+        run: bash scripts/collect-release-assets.sh release-input/linux release-input/windows release-input/macos release-assets
 
       - name: Generate release notes with commit list
         shell: bash
