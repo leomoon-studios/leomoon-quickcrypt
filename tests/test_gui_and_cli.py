@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import sys
+from pathlib import Path
 
 from PySide6 import QtCore, QtGui
 
@@ -17,7 +18,7 @@ def test_browse_drag_drop_and_clear_actions(quickcrypt_window, monkeypatch, tmp_
         lambda *_args, **_kwargs: (str(source), ""),
     )
     quickcrypt_window._encBrowse()
-    assert quickcrypt_window.ui.encFileInp.text() == str(source)
+    assert Path(quickcrypt_window.ui.encFileInp.text()) == source
 
     mime_data = QtCore.QMimeData()
     mime_data.setUrls([QtCore.QUrl.fromLocalFile(str(source))])
@@ -29,8 +30,8 @@ def test_browse_drag_drop_and_clear_actions(quickcrypt_window, monkeypatch, tmp_
         QtCore.Qt.KeyboardModifier.NoModifier,
     )
     quickcrypt_window.dropEvent(event)
-    assert quickcrypt_window.ui.encFileInp.text() == str(source)
-    assert quickcrypt_window.ui.decFileInp.text() == str(source)
+    assert Path(quickcrypt_window.ui.encFileInp.text()) == source
+    assert Path(quickcrypt_window.ui.decFileInp.text()) == source
 
     quickcrypt_window.ui.encPassInp.setText("password")
     quickcrypt_window.ui.historyEdit.setPlainText("generated")

@@ -16,6 +16,7 @@ def test_windows_workflow_uses_native_x64_and_arm64_runners() -> None:
     assert "package-windows.ps1" in workflow
     assert "smoke-windows-installer.ps1" in workflow
     assert "openssl:arm64-windows" in workflow
+    assert "CARGO_TARGET_AARCH64_PC_WINDOWS_MSVC_LINKER" in workflow
     assert workflow.index("Configure MSVC dependency tools") < workflow.index("Create locked project environment")
 
 
