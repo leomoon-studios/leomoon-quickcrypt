@@ -10,7 +10,7 @@ def test_browse_drag_drop_and_clear_actions(quickcrypt_window, monkeypatch, tmp_
     source = tmp_path / "نمونه file.txt"
     source.write_text("QuickCrypt GUI test", encoding="utf-8")
 
-    from main import QtWidgets
+    from leomoon_quickcrypt.app import QtWidgets
 
     monkeypatch.setattr(
         QtWidgets.QFileDialog,
@@ -69,13 +69,13 @@ def test_password_generator_status_and_output(quickcrypt_window) -> None:
 
 
 def test_bundled_vazir_fonts_load_from_qt_resources() -> None:
-    from main import load_bundled_fonts
+    from leomoon_quickcrypt.app import load_bundled_fonts
 
     assert "Vazir" in load_bundled_fonts()
 
 
 def test_cli_encrypt_and_decrypt_modes_accept_space_and_unicode_paths(qtbot, monkeypatch, tmp_path) -> None:
-    import main
+    from leomoon_quickcrypt import app
 
     source = tmp_path / "نمونه input.txt"
     encrypted = tmp_path / "نمونه input.txt.aes"
@@ -83,13 +83,13 @@ def test_cli_encrypt_and_decrypt_modes_accept_space_and_unicode_paths(qtbot, mon
     encrypted.write_bytes(b"AES")
 
     monkeypatch.setattr(sys, "argv", ["QuickCrypt", "-e", str(source)])
-    encrypt_window = main.mainUi()
+    encrypt_window = app.mainUi(app.parse_arguments(["-e", str(source)]))
     qtbot.addWidget(encrypt_window)
     assert encrypt_window.ui.encFileInp.text() == str(source)
     assert not encrypt_window.ui.tabWidget.isTabEnabled(1)
 
     monkeypatch.setattr(sys, "argv", ["QuickCrypt", "-d", str(encrypted)])
-    decrypt_window = main.mainUi()
+    decrypt_window = app.mainUi(app.parse_arguments(["-d", str(encrypted)]))
     qtbot.addWidget(decrypt_window)
     assert decrypt_window.ui.decFileInp.text() == str(encrypted)
     assert not decrypt_window.ui.tabWidget.isTabEnabled(0)

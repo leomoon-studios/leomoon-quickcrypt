@@ -4,7 +4,7 @@ from itertools import product
 
 import pytest
 
-from passwords import (
+from leomoon_quickcrypt.passwords import (
     LOWERCASE_CHARACTERS,
     NUMBER_CHARACTERS,
     PASSWORD_PUSHER_CHARACTERS,

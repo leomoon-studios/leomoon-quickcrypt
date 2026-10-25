@@ -7,7 +7,8 @@ import tempfile
 from collections.abc import Callable
 from pathlib import Path
 
-import ext.pyAesCrypt as pyAesCrypt
+from ._vendor import pyAesCrypt
+from .paths import available_destination, existing_file
 
 
 BUFFER_SIZE = 64 * 1024
@@ -23,20 +24,6 @@ def decrypted_output_path(source: Path) -> Path:
     if source.suffix.lower() != ".aes" or source.name.lower() == ".aes":
         raise ValueError("Encrypted files must use the .aes suffix.")
     return source.with_suffix("")
-
-
-def _input_file(path: Path) -> Path:
-    if not path.exists():
-        raise FileNotFoundError("Selected file does not exist.")
-    if not path.is_file():
-        raise IsADirectoryError("Please select a file, not a folder.")
-    return path
-
-
-def _available_destination(path: Path) -> Path:
-    if path.exists():
-        raise FileExistsError(f"Destination already exists: {path.name}")
-    return path
 
 
 def _atomic_transform(
@@ -65,10 +52,10 @@ def _atomic_transform(
 
 def encrypt_file(source: Path | str, password: str) -> Path:
     """Encrypt *source* into a new ``.aes`` file without overwriting output."""
-    input_path = _input_file(Path(source))
+    input_path = existing_file(source)
     if not password:
         raise ValueError("Password can not be empty!")
-    output_path = _available_destination(encrypted_output_path(input_path))
+    output_path = available_destination(encrypted_output_path(input_path))
     return _atomic_transform(
         input_path,
         output_path,
@@ -80,10 +67,10 @@ def encrypt_file(source: Path | str, password: str) -> Path:
 
 def decrypt_file(source: Path | str, password: str) -> Path:
     """Decrypt an AES Crypt version 2 file without overwriting plaintext."""
-    input_path = _input_file(Path(source))
+    input_path = existing_file(source)
     if not password:
         raise ValueError("Password can not be empty!")
-    output_path = _available_destination(decrypted_output_path(input_path))
+    output_path = available_destination(decrypted_output_path(input_path))
     input_size = input_path.stat().st_size
     return _atomic_transform(
         input_path,

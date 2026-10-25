@@ -14,9 +14,9 @@ sys.path.insert(0, str(SOURCE_ROOT))
 
 @pytest.fixture
 def quickcrypt_window(qtbot, monkeypatch):
-    import main
+    from leomoon_quickcrypt import app
 
     monkeypatch.setattr(sys, "argv", ["QuickCrypt"])
-    window = main.mainUi()
+    window = app.mainUi()
     qtbot.addWidget(window)
     return window

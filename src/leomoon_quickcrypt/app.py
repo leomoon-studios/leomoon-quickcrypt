@@ -1,32 +1,21 @@
 #-*- coding: utf-8 -*-
 
-"""
-Usage:
-  QuickCrypt [-e FILE | -d FILE]
-"""
-
-#version: 2.0.9
-
-# TODO:
-
 import os
 import sys
-#load dlls
-dllpath = os.path.dirname(os.path.realpath(sys.argv[0]))
-os.environ["PATH"] += os.pathsep + dllpath
-os.environ["DYLD_FALLBACK_LIBRARY_PATH"] = dllpath
+
 from PySide6 import QtCore, QtGui, QtWidgets
-#local imports
-from ext.darkdetect import isDark #darkdetect 0.7.1 [ https://github.com/albertosottile/darkdetect ] 20220718
-from ext.docopt import docopt
-from file_operations import delete_source_after_success, decrypt_file, encrypt_file
-from gui.guiMain import Ui_main
-from passwords import generate_password
+
+from ._generated.main_window import Ui_main
+from ._vendor.darkdetect import isDark
+from .cli import parse_arguments
+from .crypto import delete_source_after_success, decrypt_file, encrypt_file
+from .passwords import generate_password
+from .version import __version__
 
 home_dir = os.path.expanduser("~")
 
 title = 'LeoMoon QuickCrypt'
-ver = '1.0.0'
+ver = __version__
 ColorGroup = QtGui.QPalette.ColorGroup
 ColorRole = QtGui.QPalette.ColorRole
 FONT_RESOURCES = (":/gfx/fonts/Vazir.ttf", ":/gfx/fonts/Vazir-Black.ttf")
@@ -42,11 +31,9 @@ def load_bundled_fonts() -> tuple[str, ...]:
     return tuple(font_families)
 
 class mainUi(QtWidgets.QMainWindow):
-    def __init__(self, parent=None):
-        args = docopt(__doc__, version=ver)
-        #print(args['FILE'])
-        #print(args)
-        QtWidgets.QWidget.__init__(self, None)
+    def __init__(self, arguments=None, parent=None):
+        super().__init__(parent)
+        args = arguments or parse_arguments()
         self.themeFlg = False
         self.setAcceptDrops(True) #accept file drops
         self.ui = Ui_main()
@@ -104,21 +91,21 @@ class mainUi(QtWidgets.QMainWindow):
         self.ui.titleLbl.setText(title)
         self.ui.verLbl.setText('v'+ver)
         #modify ui based on arguments
-        if args['-e']:
+        if args.encrypt:
             self.ui.tabWidget.setTabEnabled(1,False)
             self.ui.tabWidget.setStyleSheet("QTabBar::tab::disabled {width: 0; height: 0; margin: 0; padding: 0; border: none;} ")
-            if os.path.exists(args['FILE']):
-                self.ui.encFileInp.setText(args['FILE'])
+            if args.encrypt.exists():
+                self.ui.encFileInp.setText(str(args.encrypt))
                 self.ui.encPassInp.setFocus()
             else:
                 self.ui.encBrowseBtn.setFocus()
-        elif args['-d']:
+        elif args.decrypt:
             self.ui.tabWidget.setTabEnabled(0,False)
             self.ui.tabWidget.setStyleSheet("QTabBar::tab::disabled {width: 0; height: 0; margin: 0; padding: 0; border: none;} ")
             self.ui.tabWidget.setTabEnabled(2,False)
             self.ui.tabWidget.setStyleSheet("QTabBar::tab::disabled {width: 0; height: 0; margin: 0; padding: 0; border: none;} ")
-            if os.path.exists(args['FILE']):
-                self.ui.decFileInp.setText(args['FILE'])
+            if args.decrypt.exists():
+                self.ui.decFileInp.setText(str(args.decrypt))
                 self.ui.decPassInp.setFocus()
             else:
                 self.ui.decBrowseBtn.setFocus()
@@ -397,13 +384,14 @@ class mainUi(QtWidgets.QMainWindow):
     def closeEvent(self, event):
         self.close()
 
-def main():
+def main(arguments=None) -> int:
+    parsed_arguments = parse_arguments(arguments)
     app = QtWidgets.QApplication(sys.argv)
     app.setStyle('Fusion')
     load_bundled_fonts()
-    main = mainUi()
-    main.show()
-    sys.exit(app.exec())
+    window = mainUi(parsed_arguments)
+    window.show()
+    return app.exec()
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

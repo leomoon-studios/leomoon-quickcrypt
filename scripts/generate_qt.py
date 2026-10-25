@@ -10,7 +10,9 @@ from pathlib import Path
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-UI_DIRECTORY = PROJECT_ROOT / "src" / "gui"
+PACKAGE_DIRECTORY = PROJECT_ROOT / "src" / "leomoon_quickcrypt"
+UI_DIRECTORY = PACKAGE_DIRECTORY / "ui"
+GENERATED_DIRECTORY = PACKAGE_DIRECTORY / "_generated"
 
 
 def pyside_tool(name: str) -> Path:
@@ -36,17 +38,17 @@ def main() -> None:
         pyside_tool("pyside6-rcc"),
         UI_DIRECTORY / "resources.qrc",
         "-o",
-        UI_DIRECTORY / "resources_rc.py",
+        GENERATED_DIRECTORY / "resources_rc.py",
     )
     run(
         pyside_tool("pyside6-uic"),
         "--from-imports",
-        UI_DIRECTORY / "guiMain.ui",
+        UI_DIRECTORY / "main_window.ui",
         "-o",
-        UI_DIRECTORY / "guiMain.py",
+        GENERATED_DIRECTORY / "main_window.py",
     )
-    normalize_trailing_newline(UI_DIRECTORY / "guiMain.py")
-    normalize_trailing_newline(UI_DIRECTORY / "resources_rc.py")
+    normalize_trailing_newline(GENERATED_DIRECTORY / "main_window.py")
+    normalize_trailing_newline(GENERATED_DIRECTORY / "resources_rc.py")
 
 
 if __name__ == "__main__":

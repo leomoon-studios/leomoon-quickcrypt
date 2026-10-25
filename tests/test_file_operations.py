@@ -12,7 +12,7 @@ SOURCE_ROOT = PROJECT_ROOT / "src"
 FIXTURES = Path(__file__).resolve().parent / "fixtures"
 sys.path.insert(0, str(SOURCE_ROOT))
 
-from file_operations import (
+from leomoon_quickcrypt.crypto import (
     decrypt_file,
     decrypted_output_path,
     delete_source_after_success,

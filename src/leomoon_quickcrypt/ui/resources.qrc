@@ -1,0 +1,7 @@
+<RCC>
+  <qresource prefix="gfx">
+    <file alias="fonts/Vazir.ttf">../assets/fonts/Vazir.ttf</file>
+    <file alias="fonts/Vazir-Black.ttf">../assets/fonts/Vazir-Black.ttf</file>
+    <file alias="icons/main.png">../assets/icons/main.png</file>
+  </qresource>
+</RCC>
