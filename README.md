@@ -53,6 +53,13 @@ Run the application during development with:
 .venv/bin/python -m leomoon_quickcrypt
 ```
 
+Open a selected file directly in the Encrypt or Decrypt tab with:
+
+```sh
+.venv/bin/python -m leomoon_quickcrypt --encrypt /path/to/file
+.venv/bin/python -m leomoon_quickcrypt --decrypt /path/to/file.aes
+```
+
 On Windows, use `.venv\Scripts\python.exe` in place of `.venv/bin/python`.
 
 ## Packaging
@@ -67,9 +74,13 @@ Use the **Release** GitHub Actions workflow for a non-publishing platform test. 
 
 The application executable is named `LeoMoon QuickCrypt`. Release asset filenames use the stable `leomoon-quickcrypt` slug. Do not commit package outputs, virtual environments, certificates, private keys, tokens, or other signing credentials.
 
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for local setup, checks, Qt-source regeneration, and release contribution guidance.
+
 ## Remove
 
-Use the normal uninstall method for the installed package. Windows users can remove the Explorer context-menu entries by uninstalling LeoMoon QuickCrypt.
+Use the normal uninstall method for the installed package. Windows users can remove the Explorer context-menu entries by uninstalling LeoMoon QuickCrypt. The optional source-file deletion after encryption or decryption is ordinary file removal, not secure erasure. Do not use it when secure destruction of the original data is required.
 
 ## Changelog
 
