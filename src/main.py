@@ -15,7 +15,7 @@ import sys
 dllpath = os.path.dirname(os.path.realpath(sys.argv[0]))
 os.environ["PATH"] += os.pathsep + dllpath
 os.environ["DYLD_FALLBACK_LIBRARY_PATH"] = dllpath
-from PyQt5 import QtWidgets, QtCore, QtGui #pyqt stuff
+from PySide6 import QtCore, QtGui, QtWidgets
 #local imports
 from ext.darkdetect import isDark #darkdetect 0.7.1 [ https://github.com/albertosottile/darkdetect ] 20220718
 from ext.docopt import docopt
@@ -25,11 +25,21 @@ from passwords import generate_password
 
 home_dir = os.path.expanduser("~")
 
-QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True) #enable highdpi scaling
-QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True) #use highdpi icons
-
 title = 'LeoMoon QuickCrypt'
 ver = '1.0.0'
+ColorGroup = QtGui.QPalette.ColorGroup
+ColorRole = QtGui.QPalette.ColorRole
+FONT_RESOURCES = (":/gfx/fonts/Vazir.ttf", ":/gfx/fonts/Vazir-Black.ttf")
+
+
+def load_bundled_fonts() -> tuple[str, ...]:
+    font_families = []
+    for resource_path in FONT_RESOURCES:
+        font_id = QtGui.QFontDatabase.addApplicationFont(resource_path)
+        if font_id < 0:
+            raise RuntimeError(f"Unable to load bundled font: {resource_path}")
+        font_families.extend(QtGui.QFontDatabase.applicationFontFamilies(font_id))
+    return tuple(font_families)
 
 class mainUi(QtWidgets.QMainWindow):
     def __init__(self, parent=None):
@@ -43,14 +53,19 @@ class mainUi(QtWidgets.QMainWindow):
         self.ui.setupUi(self)
 		#disable resizing
         self.setFixedSize(self.width(), self.height())
-        self.setWindowFlags(QtCore.Qt.Window | QtCore.Qt.MSWindowsFixedSizeDialogHint | QtCore.Qt.WindowMinimizeButtonHint | QtCore.Qt.WindowCloseButtonHint)
+        self.setWindowFlags(
+            QtCore.Qt.WindowType.Window
+            | QtCore.Qt.WindowType.MSWindowsFixedSizeDialogHint
+            | QtCore.Qt.WindowType.WindowMinimizeButtonHint
+            | QtCore.Qt.WindowType.WindowCloseButtonHint
+        )
         #self.setWindowFlags(QtCore.Qt.FramelessWindowHint) #frameless window
         #self.setWindowFlags(QtCore.Qt.Window | QtCore.Qt.WindowTitleHint | QtCore.Qt.CustomizeWindowHint | QtCore.Qt.WindowCloseButtonHint) #close only window
         #self.ui.tabWidget.currentChanged.connect(self._tabChange) #detect tab change
         ###############################################################################
         ####### Variables #############################################################
         ###############################################################################
-        self.hotSwitch = QtWidgets.QShortcut(QtGui.QKeySequence("Ctrl+M"), self)
+        self.hotSwitch = QtGui.QShortcut(QtGui.QKeySequence("Ctrl+M"), self)
         self.hotSwitch.activated.connect(self._theme)
         self.titleFontsize = 15
         self.uiFontsize = 10
@@ -59,7 +74,7 @@ class mainUi(QtWidgets.QMainWindow):
             self.titleFontsize = 20
             self.uiFontsize = 13
             self.statusFontsize = 14
-        self.ui.titleLbl.setFont(QtGui.QFont("Vazir", self.titleFontsize, QtGui.QFont.Black))
+        self.ui.titleLbl.setFont(QtGui.QFont("Vazir", self.titleFontsize, QtGui.QFont.Weight.Black))
         # self.ui.verLbl.setFont(QtGui.QFont('Vazir', self.statusFontsize))
         self.ui.encFileInp.setFont(QtGui.QFont('Vazir', self.uiFontsize))
         self.ui.encPassInp.setFont(QtGui.QFont('Vazir', self.uiFontsize))
@@ -78,11 +93,11 @@ class mainUi(QtWidgets.QMainWindow):
         self.ui.upperCbox.setFont(QtGui.QFont('Vazir', self.uiFontsize))
         self.ui.specialCbox.setFont(QtGui.QFont('Vazir', self.uiFontsize))
         self.ui.encClearBtn.setFont(QtGui.QFont('Vazir', self.uiFontsize))
-        self.ui.encBtn.setFont(QtGui.QFont('Vazir', self.uiFontsize, QtGui.QFont.Black))
+        self.ui.encBtn.setFont(QtGui.QFont('Vazir', self.uiFontsize, QtGui.QFont.Weight.Black))
         self.ui.decClearBtn.setFont(QtGui.QFont('Vazir', self.uiFontsize))
-        self.ui.decBtn.setFont(QtGui.QFont('Vazir', self.uiFontsize, QtGui.QFont.Black))
+        self.ui.decBtn.setFont(QtGui.QFont('Vazir', self.uiFontsize, QtGui.QFont.Weight.Black))
         self.ui.genClearBtn.setFont(QtGui.QFont('Vazir', self.uiFontsize))
-        self.ui.genBtn.setFont(QtGui.QFont('Vazir', self.uiFontsize, QtGui.QFont.Black))
+        self.ui.genBtn.setFont(QtGui.QFont('Vazir', self.uiFontsize, QtGui.QFont.Weight.Black))
         self.ui.copyLbl.setFont(QtGui.QFont('Vazir', self.uiFontsize))
         self.ui.statusLbl.setFont(QtGui.QFont('Vazir', self.uiFontsize))
         self.ui.tabWidget.setFont(QtGui.QFont('Vazir', self.uiFontsize))
@@ -119,7 +134,7 @@ class mainUi(QtWidgets.QMainWindow):
         #prepare status bar
         self.ui.statusLbl.setText('Ready.')
         self.ui.copyLbl.setOpenExternalLinks(True)
-        self.ui.copyLbl.setTextInteractionFlags(QtCore.Qt.LinksAccessibleByMouse)
+        self.ui.copyLbl.setTextInteractionFlags(QtCore.Qt.TextInteractionFlag.LinksAccessibleByMouse)
         self.ui.copyLbl.setText('© LeoMoon Studios')
         #self.ui.statusbar.addPermanentWidget(self.ui.statusLbl, 4)
         #self.ui.statusbar.addPermanentWidget(self.ui.copyLbl, 2)
@@ -182,22 +197,22 @@ class mainUi(QtWidgets.QMainWindow):
     ####### File Drop #############################################################
     ###############################################################################
     def dragEnterEvent(self, event):
-        if event.mimeData().hasUrls:
+        if event.mimeData().hasUrls():
             event.accept()
         else:
             event.ignore()
 
     def dragMoveEvent(self, event):
-        if event.mimeData().hasUrls:
-            event.setDropAction(QtCore.Qt.CopyAction)
+        if event.mimeData().hasUrls():
+            event.setDropAction(QtCore.Qt.DropAction.CopyAction)
             event.accept()
         else:
             event.ignore()
 
     def dropEvent(self, event):
-        if event.mimeData().hasUrls:
+        if event.mimeData().hasUrls():
             try:
-                event.setDropAction(QtCore.Qt.CopyAction)
+                event.setDropAction(QtCore.Qt.DropAction.CopyAction)
                 event.accept()
                 urls = event.mimeData().urls()
                 if os.path.isfile(str(urls[0].toLocalFile())):
@@ -244,25 +259,25 @@ class mainUi(QtWidgets.QMainWindow):
     def _theme(self):
         if not self.themeFlg:
             dark_theme = QtGui.QPalette()
-            dark_theme.setColor(QtGui.QPalette.Window, QtGui.QColor(55,53,53))
-            dark_theme.setColor(QtGui.QPalette.WindowText, QtGui.QColor(227,227,227))
-            dark_theme.setColor(QtGui.QPalette.Base, QtGui.QColor(30,30,30))
-            dark_theme.setColor(QtGui.QPalette.AlternateBase, QtGui.QColor(55,55,55))
-            dark_theme.setColor(QtGui.QPalette.ToolTipBase, QtGui.QColor(50,50,50))
-            dark_theme.setColor(QtGui.QPalette.ToolTipText, QtGui.QColor(227,227,227))
-            dark_theme.setColor(QtGui.QPalette.Text, QtGui.QColor(227,227,227))
-            dark_theme.setColor(QtGui.QPalette.Link, QtGui.QColor(227,227,227))
-            dark_theme.setColor(QtGui.QPalette.Button, QtGui.QColor(50,50,50))
-            dark_theme.setColor(QtGui.QPalette.ButtonText, QtGui.QColor(227,227,227))
-            dark_theme.setColor(QtGui.QPalette.BrightText, QtGui.QColor(227,227,227))
-            dark_theme.setColor(QtGui.QPalette.Highlight, QtGui.QColor(18,131,220))
-            dark_theme.setColor(QtGui.QPalette.HighlightedText, QtCore.Qt.black)
-            dark_theme.setColor(QtGui.QPalette.Active, QtGui.QPalette.Button, QtGui.QColor(53, 53, 53))
-            dark_theme.setColor(QtGui.QPalette.Inactive, QtGui.QPalette.Button, QtGui.QColor(53, 53, 53))
-            dark_theme.setColor(QtGui.QPalette.Disabled, QtGui.QPalette.ButtonText, QtGui.QColor(85,83,83))
-            dark_theme.setColor(QtGui.QPalette.Disabled, QtGui.QPalette.WindowText, QtGui.QColor(85,83,83))
-            dark_theme.setColor(QtGui.QPalette.Disabled, QtGui.QPalette.Text, QtGui.QColor(85,83,83))
-            dark_theme.setColor(QtGui.QPalette.Disabled, QtGui.QPalette.Light, QtGui.QColor(53, 53, 53))
+            dark_theme.setColor(ColorRole.Window, QtGui.QColor(55,53,53))
+            dark_theme.setColor(ColorRole.WindowText, QtGui.QColor(227,227,227))
+            dark_theme.setColor(ColorRole.Base, QtGui.QColor(30,30,30))
+            dark_theme.setColor(ColorRole.AlternateBase, QtGui.QColor(55,55,55))
+            dark_theme.setColor(ColorRole.ToolTipBase, QtGui.QColor(50,50,50))
+            dark_theme.setColor(ColorRole.ToolTipText, QtGui.QColor(227,227,227))
+            dark_theme.setColor(ColorRole.Text, QtGui.QColor(227,227,227))
+            dark_theme.setColor(ColorRole.Link, QtGui.QColor(227,227,227))
+            dark_theme.setColor(ColorRole.Button, QtGui.QColor(50,50,50))
+            dark_theme.setColor(ColorRole.ButtonText, QtGui.QColor(227,227,227))
+            dark_theme.setColor(ColorRole.BrightText, QtGui.QColor(227,227,227))
+            dark_theme.setColor(ColorRole.Highlight, QtGui.QColor(18,131,220))
+            dark_theme.setColor(ColorRole.HighlightedText, QtCore.Qt.GlobalColor.black)
+            dark_theme.setColor(ColorGroup.Active, ColorRole.Button, QtGui.QColor(53, 53, 53))
+            dark_theme.setColor(ColorGroup.Inactive, ColorRole.Button, QtGui.QColor(53, 53, 53))
+            dark_theme.setColor(ColorGroup.Disabled, ColorRole.ButtonText, QtGui.QColor(85,83,83))
+            dark_theme.setColor(ColorGroup.Disabled, ColorRole.WindowText, QtGui.QColor(85,83,83))
+            dark_theme.setColor(ColorGroup.Disabled, ColorRole.Text, QtGui.QColor(85,83,83))
+            dark_theme.setColor(ColorGroup.Disabled, ColorRole.Light, QtGui.QColor(53, 53, 53))
             QtGui.QGuiApplication.setPalette(dark_theme)
             self.setStyleSheet("""
                                     QFrame#banner {background-color: qlineargradient(x1:0 y1:0, x2:0 y2:1, stop:0 #5e5b5b, stop:1 #373535); border-radius: 0px;}
@@ -272,25 +287,25 @@ class mainUi(QtWidgets.QMainWindow):
             # self.ui.actionDarkMode.setChecked(True)
         else:
             light_theme = QtGui.QPalette()
-            light_theme.setColor(QtGui.QPalette.Window, QtGui.QColor(240,240,240))
-            light_theme.setColor(QtGui.QPalette.WindowText, QtGui.QColor(68,68,68))
-            light_theme.setColor(QtGui.QPalette.Base, QtGui.QColor(255,255,255))
-            light_theme.setColor(QtGui.QPalette.AlternateBase, QtGui.QColor(255,255,255))
-            light_theme.setColor(QtGui.QPalette.ToolTipBase, QtGui.QColor(240,240,240))
-            light_theme.setColor(QtGui.QPalette.ToolTipText, QtGui.QColor(68,68,68))
-            light_theme.setColor(QtGui.QPalette.Text, QtGui.QColor(68,68,68))
-            light_theme.setColor(QtGui.QPalette.Link, QtGui.QColor(68,68,68))
-            light_theme.setColor(QtGui.QPalette.Button, QtGui.QColor(240,240,240))
-            light_theme.setColor(QtGui.QPalette.ButtonText, QtGui.QColor(68,68,68))
-            light_theme.setColor(QtGui.QPalette.BrightText, QtGui.QColor(68,68,68))
-            light_theme.setColor(QtGui.QPalette.Highlight, QtGui.QColor(18,131,220))
-            light_theme.setColor(QtGui.QPalette.HighlightedText, QtCore.Qt.white)
-            light_theme.setColor(QtGui.QPalette.Active, QtGui.QPalette.Button, QtGui.QColor(240,240,240))
-            light_theme.setColor(QtGui.QPalette.Inactive, QtGui.QPalette.Button, QtGui.QColor(240,240,240))
-            light_theme.setColor(QtGui.QPalette.Disabled, QtGui.QPalette.ButtonText, QtGui.QColor(118,118,118))
-            light_theme.setColor(QtGui.QPalette.Disabled, QtGui.QPalette.WindowText, QtGui.QColor(118,118,118))
-            light_theme.setColor(QtGui.QPalette.Disabled, QtGui.QPalette.Text, QtGui.QColor(118,118,118))
-            light_theme.setColor(QtGui.QPalette.Disabled, QtGui.QPalette.Light, QtGui.QColor(243,243,243))
+            light_theme.setColor(ColorRole.Window, QtGui.QColor(240,240,240))
+            light_theme.setColor(ColorRole.WindowText, QtGui.QColor(68,68,68))
+            light_theme.setColor(ColorRole.Base, QtGui.QColor(255,255,255))
+            light_theme.setColor(ColorRole.AlternateBase, QtGui.QColor(255,255,255))
+            light_theme.setColor(ColorRole.ToolTipBase, QtGui.QColor(240,240,240))
+            light_theme.setColor(ColorRole.ToolTipText, QtGui.QColor(68,68,68))
+            light_theme.setColor(ColorRole.Text, QtGui.QColor(68,68,68))
+            light_theme.setColor(ColorRole.Link, QtGui.QColor(68,68,68))
+            light_theme.setColor(ColorRole.Button, QtGui.QColor(240,240,240))
+            light_theme.setColor(ColorRole.ButtonText, QtGui.QColor(68,68,68))
+            light_theme.setColor(ColorRole.BrightText, QtGui.QColor(68,68,68))
+            light_theme.setColor(ColorRole.Highlight, QtGui.QColor(18,131,220))
+            light_theme.setColor(ColorRole.HighlightedText, QtCore.Qt.GlobalColor.white)
+            light_theme.setColor(ColorGroup.Active, ColorRole.Button, QtGui.QColor(240,240,240))
+            light_theme.setColor(ColorGroup.Inactive, ColorRole.Button, QtGui.QColor(240,240,240))
+            light_theme.setColor(ColorGroup.Disabled, ColorRole.ButtonText, QtGui.QColor(118,118,118))
+            light_theme.setColor(ColorGroup.Disabled, ColorRole.WindowText, QtGui.QColor(118,118,118))
+            light_theme.setColor(ColorGroup.Disabled, ColorRole.Text, QtGui.QColor(118,118,118))
+            light_theme.setColor(ColorGroup.Disabled, ColorRole.Light, QtGui.QColor(243,243,243))
             QtGui.QGuiApplication.setPalette(light_theme)
             self.setStyleSheet("""
                                     QFrame#banner {background-color: qlineargradient(x1:0 y1:0, x2:0 y2:1, stop:0 #c9c9c9, stop:1 #F0F0F0); border-radius: 0px;}
@@ -370,7 +385,7 @@ class mainUi(QtWidgets.QMainWindow):
                 numbers=self.ui.numCbox.isChecked(),
                 special=self.ui.specialCbox.isChecked(),
             )
-            self.ui.historyEdit.moveCursor(QtGui.QTextCursor.End)
+            self.ui.historyEdit.moveCursor(QtGui.QTextCursor.MoveOperation.End)
             self.ui.historyEdit.append(password)
             self.ui.statusLbl.setText('<span style="color:green;">Password generated successfully.</span>')
         except ValueError as error:
@@ -385,11 +400,10 @@ class mainUi(QtWidgets.QMainWindow):
 def main():
     app = QtWidgets.QApplication(sys.argv)
     app.setStyle('Fusion')
-    QtGui.QFontDatabase.addApplicationFont(':/gfx/fonts/Vazir.ttf') #add custom font to install
-    QtGui.QFontDatabase.addApplicationFont(':/gfx/fonts/Vazir-Black.ttf') #add custom font to install
+    load_bundled_fonts()
     main = mainUi()
     main.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
 
 if __name__ == "__main__":
     main()

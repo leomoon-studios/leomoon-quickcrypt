@@ -3,7 +3,7 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-from PyQt5 import QtCore, QtGui
+from PySide6 import QtCore, QtGui
 
 
 def test_browse_drag_drop_and_clear_actions(quickcrypt_window, monkeypatch, tmp_path) -> None:
@@ -23,7 +23,11 @@ def test_browse_drag_drop_and_clear_actions(quickcrypt_window, monkeypatch, tmp_
     mime_data = QtCore.QMimeData()
     mime_data.setUrls([QtCore.QUrl.fromLocalFile(str(source))])
     event = QtGui.QDropEvent(
-        QtCore.QPointF(0, 0), QtCore.Qt.CopyAction, mime_data, QtCore.Qt.LeftButton, QtCore.Qt.NoModifier
+        QtCore.QPointF(0, 0),
+        QtCore.Qt.DropAction.CopyAction,
+        mime_data,
+        QtCore.Qt.MouseButton.LeftButton,
+        QtCore.Qt.KeyboardModifier.NoModifier,
     )
     quickcrypt_window.dropEvent(event)
     assert quickcrypt_window.ui.encFileInp.text() == str(source)
@@ -62,6 +66,12 @@ def test_password_generator_status_and_output(quickcrypt_window) -> None:
     password = quickcrypt_window.ui.historyEdit.toPlainText().splitlines()[-1]
     assert len(password) == 48
     assert "successfully" in quickcrypt_window.ui.statusLbl.text()
+
+
+def test_bundled_vazir_fonts_load_from_qt_resources() -> None:
+    from main import load_bundled_fonts
+
+    assert "Vazir" in load_bundled_fonts()
 
 
 def test_cli_encrypt_and_decrypt_modes_accept_space_and_unicode_paths(qtbot, monkeypatch, tmp_path) -> None:
