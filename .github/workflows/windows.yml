@@ -40,15 +40,21 @@ jobs:
           $installationPath = (& $vswhere -latest -products * -requires $component -property installationPath).Trim()
           if ([string]::IsNullOrWhiteSpace($installationPath)) { throw "Visual Studio C++ tools were not found" }
           $devCommand = Join-Path $installationPath "Common7\Tools\VsDevCmd.bat"
+          $developerPath = ""
           & cmd.exe /s /c "`"$devCommand`" -no_logo -arch=${{ matrix.release_arch }} -host_arch=${{ matrix.release_arch }} && set" |
             ForEach-Object {
               $separator = $_.IndexOf("=")
               if ($separator -gt 0) {
                 $name = $_.Substring(0, $separator)
                 $value = $_.Substring($separator + 1)
-                if ($name -notmatch '^(GITHUB_|RUNNER_|ACTIONS_)') { "$name=$value" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append }
+                if ($name -eq "Path") {
+                  $developerPath = $value
+                } elseif ($name -notmatch '^(GITHUB_|RUNNER_|ACTIONS_)') {
+                  "$name=$value" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+                }
               }
             }
+          if ([string]::IsNullOrWhiteSpace($developerPath)) { throw "Visual Studio developer path was not found" }
           if ("${{ matrix.release_arch }}" -eq "arm64") {
             $linker = Get-ChildItem -Path (Join-Path $installationPath "VC\Tools\MSVC\*\bin\Hostarm64\arm64\link.exe") | Select-Object -First 1 -ExpandProperty FullName
             if ([string]::IsNullOrWhiteSpace($linker)) { throw "MSVC ARM64 linker was not found" }
@@ -60,7 +66,9 @@ jobs:
             "CARGO_TARGET_AARCH64_PC_WINDOWS_MSVC_LINKER=$linker" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
             "VCPKG_ROOT=$vcpkgRoot" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
             "OPENSSL_DIR=$vcpkgRoot\installed\arm64-windows" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-            "$vcpkgRoot\installed\arm64-windows\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+            "Path=$vcpkgRoot\installed\arm64-windows\bin;$developerPath" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          } else {
+            "Path=$developerPath" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
           }
 
       - name: Create locked project environment

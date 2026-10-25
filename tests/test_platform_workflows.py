@@ -18,7 +18,7 @@ def test_windows_workflow_uses_native_x64_and_arm64_runners() -> None:
     assert "openssl:arm64-windows" in workflow
     assert "CARGO_TARGET_AARCH64_PC_WINDOWS_MSVC_LINKER" in workflow
     assert "installed\\arm64-windows\\bin" in workflow
-    assert "$env:GITHUB_PATH" in workflow
+    assert '$name -eq "Path"' in workflow
     assert workflow.index("Configure MSVC dependency tools") < workflow.index("Create locked project environment")
 
 
