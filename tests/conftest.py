@@ -7,7 +7,8 @@ from pathlib import Path
 import pytest
 
 
-os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+os.environ["QT_QPA_PLATFORM"] = "offscreen"
+os.environ["QT_QPA_PLATFORMTHEME"] = "none"
 SOURCE_ROOT = Path(__file__).resolve().parents[1] / "src"
 sys.path.insert(0, str(SOURCE_ROOT))
 
