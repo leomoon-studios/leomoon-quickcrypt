@@ -15,6 +15,8 @@ def test_windows_workflow_uses_native_x64_and_arm64_runners() -> None:
     assert '"x64","arm64"' in workflow
     assert "package-windows.ps1" in workflow
     assert "smoke-windows-installer.ps1" in workflow
+    assert "openssl:arm64-windows" in workflow
+    assert workflow.index("Configure MSVC dependency tools") < workflow.index("Create locked project environment")
 
 
 def test_linux_workflow_uses_native_x86_64_and_arm64_appimage_builds() -> None:
@@ -44,6 +46,13 @@ def test_platform_workflows_use_pinned_node_24_compatible_action_revisions() -> 
         assert "actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5" in workflow
         assert "actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7" in workflow
         assert "actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6" in workflow
+
+
+def test_platform_workflows_only_check_deterministic_generated_ui_output() -> None:
+    for name in ("windows.yml", "linux.yml", "macos.yml"):
+        workflow = (WORKFLOWS / name).read_text(encoding="utf-8")
+        assert "git diff --exit-code -- src/leomoon_quickcrypt/_generated/main_window.py" in workflow
+        assert "resources_rc.py" not in workflow
 
 
 def test_release_orchestrates_platform_workflows_and_limits_write_permission() -> None:

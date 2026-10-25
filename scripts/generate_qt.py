@@ -35,12 +35,6 @@ def normalize_trailing_newline(path: Path) -> None:
 
 def main() -> None:
     run(
-        pyside_tool("pyside6-rcc"),
-        UI_DIRECTORY / "resources.qrc",
-        "-o",
-        GENERATED_DIRECTORY / "resources_rc.py",
-    )
-    run(
         pyside_tool("pyside6-uic"),
         "--from-imports",
         UI_DIRECTORY / "main_window.ui",
@@ -48,7 +42,6 @@ def main() -> None:
         GENERATED_DIRECTORY / "main_window.py",
     )
     normalize_trailing_newline(GENERATED_DIRECTORY / "main_window.py")
-    normalize_trailing_newline(GENERATED_DIRECTORY / "resources_rc.py")
 
 
 if __name__ == "__main__":

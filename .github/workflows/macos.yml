@@ -34,7 +34,7 @@ jobs:
           .venv/bin/python -m pip install "uv==0.13.5"
           .venv/bin/uv sync --all-extras --locked
           .venv/bin/python scripts/generate_qt.py
-          git diff --exit-code -- src/leomoon_quickcrypt/_generated/main_window.py src/leomoon_quickcrypt/_generated/resources_rc.py
+          git diff --exit-code -- src/leomoon_quickcrypt/_generated/main_window.py
           .venv/bin/python -m ruff check src tests scripts packaging
           QT_QPA_PLATFORM=offscreen QT_QPA_PLATFORMTHEME=none QT_STYLE_OVERRIDE=Fusion .venv/bin/python -m pytest -q -rs
           .venv/bin/python -m pip check
