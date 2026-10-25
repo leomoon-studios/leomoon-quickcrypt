@@ -44,3 +44,30 @@ def test_platform_workflows_use_pinned_node_24_compatible_action_revisions() -> 
         assert "actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5" in workflow
         assert "actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7" in workflow
         assert "actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6" in workflow
+
+
+def test_release_orchestrates_platform_workflows_and_limits_write_permission() -> None:
+    release = (WORKFLOWS / "release.yml").read_text(encoding="utf-8")
+
+    assert "workflow_dispatch:" in release
+    assert 'tags: ["v*.*.*"]' in release
+    assert "./.github/workflows/linux.yml" in release
+    assert "./.github/workflows/windows.yml" in release
+    assert "./.github/workflows/macos.yml" in release
+    assert "name: Publish GitHub release" in release
+    assert "permissions:\n      contents: write" in release
+    assert "Generate release notes with commit list" in release
+    assert "gh api" in release
+    assert "https://github.com/%s/commit/%s" in release
+    assert "https://github.com/%s" in release
+
+
+def test_release_asset_collector_requires_exactly_five_expected_assets() -> None:
+    collector = (PROJECT_ROOT / "scripts" / "collect-release-assets.sh").read_text(encoding="utf-8")
+
+    assert '"leomoon-quickcrypt-$version-linux-x86_64.AppImage"' in collector
+    assert '"leomoon-quickcrypt-$version-linux-aarch64.AppImage"' in collector
+    assert '"leomoon-quickcrypt-$version-windows-x64-setup.exe"' in collector
+    assert '"leomoon-quickcrypt-$version-windows-arm64-setup.exe"' in collector
+    assert '"leomoon-quickcrypt-$version-macos-arm64.dmg"' in collector
+    assert "Expected exactly one release asset" in collector

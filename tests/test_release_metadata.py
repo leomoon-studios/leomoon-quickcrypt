@@ -38,7 +38,7 @@ def test_release_metadata_uses_a_semantic_tag(tmp_path: Path) -> None:
         "artifact_slug": "leomoon-quickcrypt",
         "commit_sha": "a" * 40,
         "display_name": "LeoMoon QuickCrypt",
-        "linux_arm64_appimage_filename": "leomoon-quickcrypt-2.1.0-linux-arm64.AppImage",
+        "linux_aarch64_appimage_filename": "leomoon-quickcrypt-2.1.0-linux-aarch64.AppImage",
         "linux_x86_64_appimage_filename": "leomoon-quickcrypt-2.1.0-linux-x86_64.AppImage",
         "macos_arm64_dmg_filename": "leomoon-quickcrypt-2.1.0-macos-arm64.dmg",
         "release_date": "2026-10-23T12:00:00Z",

@@ -63,7 +63,7 @@ def metadata_for(tag: str, *, release_date: str, commit_sha: str) -> dict[str, o
         "artifact_slug": ARTIFACT_SLUG,
         "commit_sha": commit_sha,
         "display_name": DISPLAY_NAME,
-        "linux_arm64_appimage_filename": f"{ARTIFACT_SLUG}-{version}-linux-arm64.AppImage",
+        "linux_aarch64_appimage_filename": f"{ARTIFACT_SLUG}-{version}-linux-aarch64.AppImage",
         "linux_x86_64_appimage_filename": f"{ARTIFACT_SLUG}-{version}-linux-x86_64.AppImage",
         "macos_arm64_dmg_filename": f"{ARTIFACT_SLUG}-{version}-macos-arm64.dmg",
         "release_date": normalize_date(release_date),
