@@ -14,7 +14,7 @@ from leomoon_quickcrypt.passwords import (
 )
 
 
-@pytest.mark.parametrize("uppercase,lowercase,numbers,special", product([False, True], repeat=4))
+@pytest.mark.parametrize("uppercase,lowercase,numbers,special", list(product([False, True], repeat=4)))
 def test_every_non_empty_character_set_combination_and_requested_length(
     uppercase: bool, lowercase: bool, numbers: bool, special: bool
 ) -> None:

@@ -6,7 +6,7 @@ import sys
 from PySide6 import QtCore, QtGui, QtWidgets
 
 from ._generated.main_window import Ui_main
-from ._vendor.darkdetect import isDark
+from darkdetect import isDark
 from .cli import parse_arguments
 from .crypto import delete_source_after_success, decrypt_file, encrypt_file
 from .passwords import generate_password

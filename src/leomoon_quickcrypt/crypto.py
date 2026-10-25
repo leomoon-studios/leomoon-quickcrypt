@@ -7,7 +7,7 @@ import tempfile
 from collections.abc import Callable
 from pathlib import Path
 
-from ._vendor import pyAesCrypt
+import pyAesCrypt
 from .paths import available_destination, existing_file
 
 
@@ -71,12 +71,11 @@ def decrypt_file(source: Path | str, password: str) -> Path:
     if not password:
         raise ValueError("Password can not be empty!")
     output_path = available_destination(decrypted_output_path(input_path))
-    input_size = input_path.stat().st_size
     return _atomic_transform(
         input_path,
         output_path,
         lambda input_file, output_file: pyAesCrypt.decryptStream(
-            input_file, output_file, password, BUFFER_SIZE, input_size
+            input_file, output_file, password, BUFFER_SIZE
         ),
     )
 
