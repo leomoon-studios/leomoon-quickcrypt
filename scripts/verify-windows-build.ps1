@@ -13,9 +13,19 @@ $machine = [System.BitConverter]::ToUInt16($bytes, $peOffset + 4)
 $expectedMachine = if ($Architecture -eq "arm64") { 0xAA64 } else { 0x8664 }
 if ($machine -ne $expectedMachine) { throw "The application is not $Architecture" }
 
-$dumpbin = Get-Command dumpbin.exe -ErrorAction SilentlyContinue
+$dumpbin = (Get-Command dumpbin.exe -ErrorAction SilentlyContinue).Source
+if (-not $dumpbin) {
+    $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+    if (Test-Path -LiteralPath $vswhere) {
+        $installationPath = (& $vswhere -latest -products * -property installationPath).Trim()
+        $hostArchitecture = if ($env:PROCESSOR_ARCHITECTURE -eq "ARM64") { "arm64" } else { "x64" }
+        $candidate = Get-ChildItem -Path (Join-Path $installationPath "VC\Tools\MSVC\*\bin\Host$hostArchitecture\$hostArchitecture\dumpbin.exe") -ErrorAction SilentlyContinue |
+            Select-Object -First 1 -ExpandProperty FullName
+        if ($candidate) { $dumpbin = $candidate }
+    }
+}
 if (-not $dumpbin) { throw "dumpbin.exe is required to verify PE dependencies" }
-$dependencies = & $dumpbin.Source /DEPENDENTS $application
+$dependencies = & $dumpbin /DEPENDENTS $application
 if ($LASTEXITCODE -ne 0) { throw "dumpbin /DEPENDENTS failed" }
 foreach ($forbidden in @("MSVCP100.DLL", "MSVCR100.DLL")) {
     if ($dependencies -match [regex]::Escape($forbidden)) { throw "The application imports obsolete Visual C++ 2010 runtime $forbidden" }
