@@ -15,13 +15,13 @@ import sys
 dllpath = os.path.dirname(os.path.realpath(sys.argv[0]))
 os.environ["PATH"] += os.pathsep + dllpath
 os.environ["DYLD_FALLBACK_LIBRARY_PATH"] = dllpath
-import random
 from PyQt5 import QtWidgets, QtCore, QtGui #pyqt stuff
 #local imports
 from ext.darkdetect import isDark #darkdetect 0.7.1 [ https://github.com/albertosottile/darkdetect ] 20220718
 from ext.docopt import docopt
 from file_operations import delete_source_after_success, decrypt_file, encrypt_file
 from gui.guiMain import Ui_main
+from passwords import generate_password
 
 home_dir = os.path.expanduser("~")
 
@@ -177,11 +177,6 @@ class mainUi(QtWidgets.QMainWindow):
         ###############################################################################
         self.setWindowTitle(title)
         self.buffersize = 64*1024
-        self.pppChars = '!#%+23456789:=?@ABCDEFGHJKLMNPRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
-        self.upperChars = 'ABCDEFGHIJLKMNOPQRSTUVWXYZ'
-        self.lowerChars = 'abcdefghijklmnopqrstuvwxyz'
-        self.specialChars = '`~@#$%^&*()_+-=[]\\{|}"\',.<>/?'
-        self.numChars = '01234567890'
 
     ###############################################################################
     ####### File Drop #############################################################
@@ -207,7 +202,7 @@ class mainUi(QtWidgets.QMainWindow):
                 urls = event.mimeData().urls()
                 if os.path.isfile(str(urls[0].toLocalFile())):
                     self._dropOpen(str(urls[0].toLocalFile()))
-            except Exception as error:
+            except Exception:
                 event.ignore()
         else:
             event.ignore()
@@ -366,21 +361,20 @@ class mainUi(QtWidgets.QMainWindow):
             self.ui.specialCbox.setEnabled(True)
 
     def _passgen(self):
-        self.chars = ''
-        if self.ui.pppCbox.isChecked():
-            self.chars += self.pppChars
-        else:
-            if self.ui.upperCbox.isChecked():
-                self.chars += self.upperChars
-            if self.ui.lowerCbox.isChecked():
-                self.chars += self.lowerChars
-            if self.ui.numCbox.isChecked():
-                self.chars += self.numChars
-            if self.ui.specialCbox.isChecked():
-                self.chars += self.specialChars
-        self.ui.historyEdit.moveCursor(QtGui.QTextCursor.End)
-        self.ui.historyEdit.append(''.join(random.choice(self.chars) for i in range(self.ui.lengthSbox.value())))
-        self.ui.statusLbl.setText('<span style="color:green;">Password generated successfully.</span>')
+        try:
+            password = generate_password(
+                self.ui.lengthSbox.value(),
+                password_pusher=self.ui.pppCbox.isChecked(),
+                uppercase=self.ui.upperCbox.isChecked(),
+                lowercase=self.ui.lowerCbox.isChecked(),
+                numbers=self.ui.numCbox.isChecked(),
+                special=self.ui.specialCbox.isChecked(),
+            )
+            self.ui.historyEdit.moveCursor(QtGui.QTextCursor.End)
+            self.ui.historyEdit.append(password)
+            self.ui.statusLbl.setText('<span style="color:green;">Password generated successfully.</span>')
+        except ValueError as error:
+            self.ui.statusLbl.setText('<span style="color:#CD5C5C;">'+str(error)+'</span>')
 
     def _exit(self):
         self.close()

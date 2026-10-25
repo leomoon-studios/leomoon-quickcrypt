@@ -155,11 +155,21 @@ class FileOperationsTest(unittest.TestCase):
     def test_rejects_non_aes_decrypt_input_without_creating_output(self) -> None:
         source = self.write_plaintext("not-encrypted.txt")
 
-        with self.assertRaises(ValueError):
+        with self.assertRaisesRegex(ValueError, "\\.aes suffix"):
             decrypt_file(source, PASSWORD)
 
         self.assertTrue(source.exists())
         self.assertEqual(decrypted_output_path(self.root / "example.AES"), self.root / "example")
+
+    def test_missing_and_directory_inputs_report_clear_errors(self) -> None:
+        missing = self.root / "missing.txt"
+        directory = self.root / "directory"
+        directory.mkdir()
+
+        with self.assertRaisesRegex(FileNotFoundError, "does not exist"):
+            encrypt_file(missing, PASSWORD)
+        with self.assertRaisesRegex(IsADirectoryError, "not a folder"):
+            encrypt_file(directory, PASSWORD)
 
 
 if __name__ == "__main__":
