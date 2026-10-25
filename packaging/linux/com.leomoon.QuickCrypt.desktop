@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=LeoMoon QuickCrypt
+Comment=Encrypt files and generate strong passwords
+Exec=leomoon-quickcrypt %F
+Icon=com.leomoon.QuickCrypt
+MimeType=application/x-aescrypt;
+Categories=Utility;
+Terminal=false
+StartupNotify=true
