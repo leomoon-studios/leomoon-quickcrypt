@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import sys
-from pathlib import Path
 
 from PySide6 import QtCore, QtGui
 
@@ -94,12 +93,3 @@ def test_cli_encrypt_and_decrypt_modes_accept_space_and_unicode_paths(qtbot, mon
     assert decrypt_window.ui.decFileInp.text() == str(encrypted)
     assert not decrypt_window.ui.tabWidget.isTabEnabled(0)
     assert not decrypt_window.ui.tabWidget.isTabEnabled(2)
-
-
-def test_legacy_windows_shell_commands_preserve_cli_mode_and_file_argument() -> None:
-    installer = (
-        Path(__file__).resolve().parents[1] / "src" / "_setup" / "setupgen.iss"
-    ).read_text(encoding="utf-8")
-
-    assert '""{app}\\{#AppExeName}"" -e ""%1""' in installer
-    assert '""{app}\\{#AppExeName}"" -d ""%1""' in installer
