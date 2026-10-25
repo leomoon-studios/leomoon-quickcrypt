@@ -108,7 +108,8 @@ def build(args: argparse.Namespace, output_directory: Path) -> Path:
     if not executable.is_file():
         raise FileNotFoundError("PyInstaller did not produce the expected application executable.")
     if sys.platform == "darwin":
-        shutil.move(str(bundle), application_directory)
+        application_directory.mkdir()
+        shutil.move(str(bundle), application_directory / bundle.name)
     return application_directory
 
 
