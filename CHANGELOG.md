@@ -9,6 +9,10 @@
 - Added deterministic PyInstaller bundles and native packaging for Windows x64 and ARM64, Linux x86_64 and ARM64 AppImages, and macOS ARM64 DMG releases.
 - Added GitHub Actions platform builds and tag-based GitHub releases with SHA-256 checksums, linked commits, and contributor profiles.
 - Removed obsolete build scripts, old installers, and bundled runtime artifacts.
+- Fixed deterministic Qt generation checks so release runners do not reject timestamp-only resource changes.
+- Fixed macOS application-bundle staging to match the maintained SubFix packaging flow.
+- Fixed Windows Qt drag-and-drop path assertions across native path separators.
+- Fixed native Windows ARM64 Cryptography source builds by using the MSVC ARM64 linker and ARM64 OpenSSL dependencies.
 
 ## 2.0.8 2021-10-05
 
